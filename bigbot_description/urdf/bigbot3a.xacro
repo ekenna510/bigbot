@@ -1,0 +1,155 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" 
+ 	xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+    	xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+    	xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+	name="bigbot">
+
+	<!-- This only has base_footprint and baselink
+
+
+	-->
+
+	<!-- Defining the colors used in this robot -->
+	<material name="Black">
+	  <color rgba="0.0 0.0 0.0 1.0"/>
+	</material>
+
+	<material name="Red">
+	  <color rgba="0.8 0.0 0.0 1.0"/>
+	</material>
+
+	<material name="White">
+	  <color rgba="1.0 1.0 1.0 1.0"/>
+	</material>
+
+
+	<material name="Blue">
+	  <color rgba="0.0 0.0 0.8 1.0"/>
+	</material>
+
+	<material name="Green">
+	  <color rgba="0.0 1.0 0.0 1.0"/>
+	</material>
+
+
+	<!-- Defining parameters-->
+	<xacro:property name="mass_base" value="12" />
+	<xacro:property name="length_base" value="0.7001" /> <!-- 27 9/16-->
+	<xacro:property name="width_base" value="0.60325" /><!--23.75 -->
+	<xacro:property name="depth_base" value="0.1524" />
+	<xacro:property name="wheel_base" value=" 0.5461" /> <!--23.75 outside to outside  - 1.75 width of wheel  -->
+
+	<xacro:property name="length_wheel" value="0.0682625" />
+	<xacro:property name="radius_wheel" value="0.085725" /> <!-- 6.75 in -->
+	<xacro:property name="extend_wheel" value="0.0" /> <!-- to be added to collision for axile -->
+ 	<xacro:property name="M_PI_2" value="1.570796327" />
+ 	<xacro:property name="M_PI" value="3.1415926535897931" />
+	<xacro:property name="radius_caster" value="0.0635" />
+
+        <!-- Define a macro --> 
+	<xacro:macro name="default_inertial" params="mass">
+               <inertial>
+                       <mass value="${mass}" />
+                       <inertia ixx="1.0" ixy="0.0" ixz="0.0"
+                                iyy="1.0" iyz="0.0"
+                                izz="1.0" />
+               </inertial>
+	</xacro:macro>
+
+
+	<xacro:macro name="cylinder_inertial" params="m r h">
+		<inertial>
+			 <mass value="${m}" />
+			<inertia  ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+	      		iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+	      		izz="${m*r*r/2}" /> 
+               </inertial>
+	</xacro:macro>
+
+
+	<!-- per https://en.wikipedia.org/wiki/List_of_moments_of_inertia 
+	  ixx = m/12(h * h  + d * d)
+	  iyy = m/12(w * w  + d * d)
+	  izz= m/12(w * w  + h * h)
+	 -->
+
+       <!-- per https://answers.ros.org/question/39107/urdf-link-mass-inertia-prop 
+		origin should be from baselink origin to center of mass.
+		which  is half way from axil (baselink) to caster attachment
+		which I estimate is 9 inches -->
+
+
+	<xacro:macro name="box_inertial" params="m w h d x">
+		<inertial>
+			 <mass value="${m}" />
+			<inertia  ixx="${m*(h*h + d *d)/12}" 
+			ixy = "0" ixz = "0"
+	      		iyy="${m*(w*w+d*d)/12}" 
+			iyz = "0"
+	      		izz="${m*(h*h+w*w)/12}" 
+			/> 
+
+			<origin xyz="${x} 0 0"/>
+               </inertial>
+	</xacro:macro>
+
+	<!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin -->
+        <!-- 		<xacro:default_inertial mass="0.0001"/> error said to remove this from footprint-->
+	<link name="base_footprint">
+   		<visual>
+			<geometry>
+      				<box size="0.001 0.001 0.001"/>
+     			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<material name="Red"/>
+   		</visual>
+		<xacro:default_inertial mass="0.0001"/>
+
+ 	</link>
+
+	<gazebo reference="base_footprint">
+		<material>Gazebo/Red</material>
+		<turnGravityOff>false</turnGravityOff>
+	</gazebo>
+
+	<joint name="base_footprint_joint" type="fixed">
+		<origin xyz="0 0 ${radius_wheel}" rpy="0 0 0" />
+		<parent link="base_footprint" />
+		<child link="base_link" />
+	</joint>
+
+
+	<link name="base_link">
+   		<visual>
+			<geometry>
+      				<box size="${length_base} ${width_base} ${depth_base}"/>
+     			</geometry>
+			<!-- per http://wiki.ros.org/urdf/XML/link a box's origin is the center of the box 
+			so the way I understand this is we need to offset from the axil to the center of my base 
+			to have the box show up right 
+			I am estimating I have 3 (0.0762m) inches in front of my axil (where I want baseink to be)
+			which I think leaves 10.78125inches (0.274m) to the center of the box 
+			I think this needs to be negative
+			--> 
+			<origin xyz="-0.274 0 ${depth_base}" rpy="0 0 0" />
+			<material name="White"/>
+   		</visual>
+		<collision>
+			<geometry>
+       				<box size="${length_base} ${width_base} ${depth_base}"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="-0.22 0 0"/>
+		</collision>
+
+		<xacro:box_inertial m="${mass_base}" w="${width_base}" h="${length_base}" d="${depth_base}"  x="-0.22" />
+ 	</link>
+
+	<gazebo reference="base_link">
+	    <material>Gazebo/White</material>
+	    <turnGravityOff>false</turnGravityOff>
+	</gazebo>
+
+
+
+</robot>

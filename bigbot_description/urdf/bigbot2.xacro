@@ -1,0 +1,400 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" 
+ 	xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+    	xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+    	xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+	name="bigbot">
+
+	<!-- This has base_link as root
+		This attaches wheels and laser off chassis Also laser is rotated 90 degrees
+		Gazebo 
+			differential_drive_controller using base_link
+			gpu_ray laser
+	-->
+	<!-- Defining the colors used in this robot -->
+	<material name="Black">
+	  <color rgba="0.0 0.0 0.0 1.0"/>
+	</material>
+
+	<material name="Red">
+	  <color rgba="0.8 0.0 0.0 1.0"/>
+	</material>
+
+	<material name="White">
+	  <color rgba="1.0 1.0 1.0 1.0"/>
+	</material>
+
+
+	<material name="Blue">
+	  <color rgba="0.0 0.0 0.8 1.0"/>
+	</material>
+
+	<material name="Green">
+	  <color rgba="0.0 1.0 0.0 1.0"/>
+	</material>
+
+
+	<!-- Defining parameters-->
+	<xacro:property name="mass_base" value="12" />
+	<xacro:property name="length_base" value="0.7001" /> <!-- 27 9/16 in-->
+	<xacro:property name="width_base" value="0.60325" /><!--23.75 in -->
+	<xacro:property name="depth_base" value="0.0127" />
+
+	<xacro:property name="wheel_base" value=" 0.5461" /> <!--23.25 in outside to outside  - 0.0435m width of wheel  -->
+	<xacro:property name="length_wheel" value="0.0435" /> <!-- 0.0435 from diagram of wheel-->
+	<xacro:property name="radius_wheel" value="0.085" /> <!-- 0.170 (from diagram of wheel)/2 -->
+	<xacro:property name="extend_wheel" value="0.0" /> <!-- to be added to collision for axile -->
+ 	<xacro:property name="M_PI_2" value="1.570796327" />
+ 	<xacro:property name="M_PI" value="3.1415926535897931" />
+	<xacro:property name="radius_caster" value="0.0635" /> <!--5in caster wheel-->
+
+	<xacro:property name="extend_base" value="0.0786" /> 
+	<xacro:property name="base_offset" value="0.1905" />  <!--7.5  -->
+	<xacro:property name="wheel_offset" value="0.104775" />
+
+        <!-- Define a macro --> 
+	<xacro:macro name="default_inertial" params="mass">
+               <inertial>
+                       <mass value="${mass}" />
+                       <inertia ixx="1.0" ixy="0.0" ixz="0.0"
+                                iyy="1.0" iyz="0.0"
+                                izz="1.0" />
+               </inertial>
+	</xacro:macro>
+
+
+	<xacro:macro name="cylinder_inertial" params="m r h">
+		<inertial>
+			 <mass value="${m}" />
+			<inertia  ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+	      		iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+	      		izz="${m*r*r/2}" /> 
+               </inertial>
+	</xacro:macro>
+
+
+	<!-- per https://en.wikipedia.org/wiki/List_of_moments_of_inertia 
+	  ixx = m/12(h * h  + d * d)
+	  iyy = m/12(w * w  + d * d)
+	  izz= m/12(w * w  + h * h)
+	 -->
+
+       <!-- per https://answers.ros.org/question/39107/urdf-link-mass-inertia-prop 
+		origin should be from baselink origin to center of mass.
+		which  is half way from axil (baselink) to caster attachment
+		which I estimate is 9 inches -->
+
+
+	<xacro:macro name="box_inertial" params="m w h d x">
+		<inertial>
+			 <mass value="${m}" />
+			<inertia  ixx="${m*(h*h + d *d)/12}" 
+			ixy = "0" ixz = "0"
+	      		iyy="${m*(w*w+d*d)/12}" 
+			iyz = "0"
+	      		izz="${m*(h*h+w*w)/12}" 
+			/> 
+
+			<origin xyz="${x} 0 0"/>
+               </inertial>
+	</xacro:macro>
+
+	<!-- base_link is a fictitious link(frame) that is on the ground right below chassis_link origin -->
+	<!--I want base_link to be centered between front wheel axiles this should be the point of rotation-->
+        <!-- 		<xacro:default_inertial mass="0.0001"/> error said to remove this from footprint-->
+	<link name="base_link">
+		<pose>0 0 0.1 0 0 0</pose>
+   		<visual>
+			<geometry>
+      				<box size="0.001 0.001 0.001"/>
+     		</geometry>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<material name="Red"/>
+   		</visual>
+		<!--xacro:default_inertial mass="0.0001"/this was throwing an error-->
+
+ 	</link>
+
+	<gazebo reference="base_link">
+		<material>Gazebo/Red</material>
+		<turnGravityOff>false</turnGravityOff>
+	</gazebo>
+
+	<joint name="base_link_joint" type="fixed">
+		<origin xyz="0 0 ${base_offset}" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="chassis_link" />
+	</joint>
+
+
+	<link name="chassis_link">
+   		<visual>
+			<geometry>
+      				<box size="${length_base} ${width_base} ${depth_base}"/>
+     			</geometry>
+			<!-- per http://wiki.ros.org/urdf/XML/link a box's origin is the center of the box 
+			so the way I understand this is we need to offset from the axil to the center of my base 
+			to have the box show up right 
+			I am estimating I have 3 inches (0.0762m) in front of my axil (where I want baseink to be)
+			which I think leaves 10.78125inches (0.274m) to the center of the box 
+			I think this needs to be negative
+			--> 
+			<origin xyz="-0.274 0 ${depth_base/2}" rpy="0 0 0" />
+			<material name="White"/>
+   		</visual>
+		<collision>
+			<geometry>
+       				<box size="${length_base +extend_base} ${width_base+extend_base} ${depth_base+extend_base}"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="-0.274 0 0"/>
+		</collision>
+
+		<xacro:box_inertial m="${mass_base}" w="${width_base}" h="${length_base}" d="${depth_base}"  x="-0.274" />
+ 	</link>
+
+	<gazebo reference="chassis_link">
+	    <material>Gazebo/White</material>
+	    <turnGravityOff>false</turnGravityOff>
+	</gazebo>
+
+
+ 	<link name="left_wheel">
+   		<visual>
+     			<geometry>
+       				<cylinder length="${length_wheel}" radius="${radius_wheel}"/>
+     			</geometry>
+
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+   			<material name="Red"/>
+		</visual>
+		<collision>
+			<geometry>
+       				<cylinder length="${length_wheel+ extend_wheel}" radius="${radius_wheel}"/>
+			</geometry>
+		</collision>
+		<xacro:cylinder_inertial m="1" r="${radius_wheel}" h="${length_wheel}"/>
+ 	</link>
+
+	<gazebo reference="left_wheel">
+		<turnGravityOff>false</turnGravityOff>
+        <material>Gazebo/Red</material>
+	</gazebo>
+
+
+ 	<link name="right_wheel">
+   		<visual>
+     			<geometry>
+       				<cylinder length="${length_wheel}" radius="${radius_wheel}"/>
+     			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 0"/>
+   			<material name="Green"/>
+   		</visual>
+		<collision>
+			<geometry>
+       				<cylinder length="${length_wheel+ extend_wheel}" radius="${radius_wheel}"/>
+			</geometry>
+		</collision>
+		<xacro:cylinder_inertial m="1" r="${radius_wheel}" h="${length_wheel}"/>
+
+ 	</link>
+
+
+     <gazebo reference="right_wheel">
+	    <turnGravityOff>false</turnGravityOff>
+        <material>Gazebo/Green</material>
+     </gazebo>
+
+	 <joint name="base_to_left_wheel" type="continuous">
+		<parent link="chassis_link"/>
+		<child link="left_wheel"/>
+		<origin rpy="1.5707 0 0" xyz="0 ${wheel_base/2} ${-wheel_offset}"/>
+		<axis xyz="0 0 1" />
+	 </joint>
+
+
+	 <joint name="base_to_right_wheel" type="continuous">
+		<parent link="chassis_link"/>
+		<child link="right_wheel"/>
+		<origin rpy="1.5707 0 0" xyz="0 ${-wheel_base/2} ${-wheel_offset}"/>
+		<axis xyz="0 0 1" />
+	 </joint>
+
+
+	<!--Caster Back  -->
+
+    <link name="caster_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
+        <geometry>
+	      <sphere radius="${radius_caster}" />
+        </geometry>
+        <material name="Blue" />
+      </visual>  
+      <collision>
+        <geometry>
+    	<sphere radius="${radius_caster}" />
+        </geometry>
+        <origin xyz="0 0. 0" rpy="${M_PI/2} 0 0" />
+      </collision>      
+      <inertial>
+        <mass value="1" />
+        <origin xyz="0 0 0" />
+        <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+                 iyy="0.001" iyz="0.0" 
+                 izz="0.001" />
+      </inertial>
+    </link>
+
+
+   <joint name="caster_joint" type="fixed">
+      <parent link="chassis_link"/>
+      <child link="caster_link"/>
+	  <origin xyz="-0.4948 0.0 ${-(wheel_offset + 0.020)}" rpy="0 0 0" />
+   </joint>
+
+
+<!-- R was ${-M_PI/2} -->
+
+	<gazebo reference="caster_link">
+		<turnGravityOff>false</turnGravityOff>
+		<material>Gazebo/Blue</material>
+	</gazebo>
+
+
+  <!--how I did my laser I want my laser pointing 90 degrees so I created this point to represent the
+   mounting location called laser_point and then I created the actual laser at this point with 
+   the rotation
+  -->
+  <!-- laser joint -->
+  <!-- laser is 4 25/32 in front of wheel =.12144m-->
+  <!-- but attaching laster off chasis so need to add .22-->
+  <joint name="laser_joint" type="fixed">
+    <origin xyz="0.12144 0 -0.05715" rpy="0 0 0"/>
+    <parent link="chassis_link"/>
+    <axis xyz="0 1 0" />
+    <child link="laser_point"/>
+  </joint>
+
+  <!-- laser joint -->
+  <joint name="laser_rotate" type="fixed">
+    <origin xyz="0 0 0" rpy="3.14 0 -1.57"/>
+    <parent link="laser_point"/>
+    <axis xyz="0 1 0" />
+    <child link="laser_frame"/>
+  </joint>
+
+  <link name="laser_point">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length=".0001" radius="0.0001"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length=".0001" radius="0.0001"/>
+      </geometry>
+      <material name="Blue" />
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+
+
+  <!-- sweep Laser -->
+  <link name="laser_frame">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length=".0508" radius="0.0635"/>
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length=".0508" radius="0.0635"/>
+      </geometry>
+      <material name="Blue" />
+    </visual>
+
+    <inertial>
+      <mass value="1e-5" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+
+
+ 
+  <!-- Differential drive controller  -->
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+
+      <rosDebugLevel>Debug</rosDebugLevel>
+      <publishWheelTF>false</publishWheelTF>
+      <robotNamespace>/</robotNamespace>
+      <publishTf>1</publishTf>
+      <publishWheelJointState>false</publishWheelJointState>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>100.0</updateRate>
+      <leftJoint>base_to_left_wheel</leftJoint>
+      <rightJoint>base_to_right_wheel</rightJoint>
+      <wheelSeparation>${wheel_base}</wheelSeparation>
+      <wheelDiameter>${2*radius_wheel}</wheelDiameter>
+      <broadcastTF>1</broadcastTF>
+      <wheelTorque>30</wheelTorque>
+      <wheelAcceleration>1.8</wheelAcceleration>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryFrame>odom</odometryFrame> 
+      <odometryTopic>odom</odometryTopic> 
+      <robotBaseFrame>base_link</robotBaseFrame>
+
+
+    </plugin>
+</gazebo> 
+
+<gazebo reference="laser_frame">
+    <sensor type="gpu_ray" name="head_hokuyo_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>7</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>720</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>12.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>	  
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
+        <topicName>/scan</topicName>
+        <frameName>hokuyo_link</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>
