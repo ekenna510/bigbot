@@ -63,11 +63,11 @@
 
 	<xacro:macro name="cylinder_inertial" params="m r h">
 		<inertial>
-			 <mass value="${m}" />
+			<mass value="${m}" />
 			<inertia  ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
 	      		iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
 	      		izz="${m*r*r/2}" /> 
-               </inertial>
+        </inertial>
 	</xacro:macro>
 
 
@@ -100,11 +100,11 @@
 	<!-- base_footprint is a fictitious link(frame) that is on the ground right below base_link origin -->
         <!-- 		<xacro:default_inertial mass="0.0001"/> error said to remove this from footprint-->
 	<link name="base_footprint">
-		<pose xyz="0 0 .001" rpy="0 0 0"
+		<pose xyz="0 0 .001" rpy="0 0 0" />
    		<visual>
 			<geometry>
       				<box size="0.001 0.001 0.001"/>
-     			</geometry>
+     		</geometry>
 			<origin rpy="0 0 0" xyz="0 0 0"/>
 			<material name="Red"/>
    		</visual>
@@ -350,7 +350,7 @@
 
 
     </plugin>
-	</gazebo> 
+  </gazebo> 
 <gazebo reference="laser_frame">
     <sensor type="gpu_ray" name="head_hokuyo_sensor">
       <pose>0 0 0 0 0 0</pose>

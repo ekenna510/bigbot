@@ -2,19 +2,19 @@
   <model name='bigbot'>
     <link name='base_link'>
       <inertial>
-        <pose>-0.241138 0 0.180902 0 -0 0</pose>
+        <pose>-0.290984 0 0.180902 0 -0 0</pose>
         <mass>13</mass>
         <inertia>
           <ixx>0.505675</ixx>
           <ixy>-2.06795e-25</ixy>
-          <ixz>-0.0316503</ixz>
-          <iyy>0.449154</iyy>
+          <ixz>-0.0254307</ixz>
+          <iyy>0.424451</iyy>
           <iyz>-4.59177e-41</iyz>
-          <izz>0.924761</izz>
+          <izz>0.900058</izz>
         </inertia>
       </inertial>
       <collision name='base_link_fixed_joint_lump__chassis_link_collision'>
-        <pose>-0.22 0 0.1905 0 -0 0</pose>
+        <pose>-0.274 0 0.1905 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.7787 0.68185 0.0913</size>
@@ -62,6 +62,14 @@
             <radius>0.0635</radius>
           </cylinder>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
       </collision>
       <visual name='base_link_visual'>
         <pose>0 0 0 0 -0 0</pose>
@@ -78,7 +86,7 @@
         </material>
       </visual>
       <visual name='base_link_fixed_joint_lump__chassis_link_visual_1'>
-        <pose>-0.22 0 0.19685 0 -0 0</pose>
+        <pose>-0.274 0 0.19685 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.7001 0.60325 0.0127</size>
@@ -124,6 +132,35 @@
         </geometry>
       </visual>
       <gravity>1</gravity>
+      <sensor name='head_hokuyo_sensor' type='gpu_ray'>
+        <visualize>0</visualize>
+        <update_rate>7</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-1.5708</min_angle>
+              <max_angle>1.5708</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>12</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </ray>
+        <plugin name='gazebo_ros_head_hokuyo_controller' filename='libgazebo_ros_gpu_laser.so'>
+          <topicName>/scan</topicName>
+          <frameName>hokuyo_link</frameName>
+        </plugin>
+        <pose>0.12144 0 0.13335 3.14 -0 -1.57</pose>
+      </sensor>
     </link>
     <joint name='base_to_left_wheel' type='revolute'>
       <pose relative_to='base_link'>0 0.27305 0.085725 1.5707 -0 0</pose>
@@ -147,20 +184,20 @@
         <pose>0 0 0 0 -0 0</pose>
         <mass>1</mass>
         <inertia>
-          <ixx>0.00222551</ixx>
+          <ixx>0.00196394</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.00222551</iyy>
+          <iyy>0.00196394</iyy>
           <iyz>0</iyz>
-          <izz>0.00367439</izz>
+          <izz>0.0036125</izz>
         </inertia>
       </inertial>
       <collision name='left_wheel_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.0682625</length>
-            <radius>0.085725</radius>
+            <length>0.0435</length>
+            <radius>0.085</radius>
           </cylinder>
         </geometry>
         <surface>
@@ -176,8 +213,8 @@
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.0682625</length>
-            <radius>0.085725</radius>
+            <length>0.0435</length>
+            <radius>0.085</radius>
           </cylinder>
         </geometry>
         <material>
@@ -211,20 +248,20 @@
         <pose>0 0 0 0 -0 0</pose>
         <mass>1</mass>
         <inertia>
-          <ixx>0.00222551</ixx>
+          <ixx>0.00196394</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.00222551</iyy>
+          <iyy>0.00196394</iyy>
           <iyz>0</iyz>
-          <izz>0.00367439</izz>
+          <izz>0.0036125</izz>
         </inertia>
       </inertial>
       <collision name='right_wheel_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.0682625</length>
-            <radius>0.085725</radius>
+            <length>0.0435</length>
+            <radius>0.085</radius>
           </cylinder>
         </geometry>
         <surface>
@@ -240,8 +277,8 @@
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <cylinder>
-            <length>0.0682625</length>
-            <radius>0.085725</radius>
+            <length>0.0435</length>
+            <radius>0.085</radius>
           </cylinder>
         </geometry>
         <material>
@@ -265,7 +302,7 @@
       <leftJoint>base_to_left_wheel</leftJoint>
       <rightJoint>base_to_right_wheel</rightJoint>
       <wheelSeparation>0.5461</wheelSeparation>
-      <wheelDiameter>0.17145</wheelDiameter>
+      <wheelDiameter>0.17</wheelDiameter>
       <broadcastTF>1</broadcastTF>
       <wheelTorque>30</wheelTorque>
       <wheelAcceleration>1.8</wheelAcceleration>

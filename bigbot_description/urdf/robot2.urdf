@@ -4,6 +4,12 @@
 <!-- |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED                                 | -->
 <!-- =================================================================================== -->
 <robot name="bigbot" xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller" xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface" xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor">
+  <!-- This has base_link as root
+		This attaches wheels and laser off chassis Also laser is rotated 90 degrees
+		Gazebo 
+			differential_drive_controller using base_link
+			gpu_ray laser
+	-->
   <!-- Defining the colors used in this robot -->
   <material name="Black">
     <color rgba="0.0 0.0 0.0 1.0"/>
@@ -20,7 +26,7 @@
   <material name="Green">
     <color rgba="0.0 1.0 0.0 1.0"/>
   </material>
-  <!--23.75 outside to outside  - 1.75 width of wheel  -->
+  <!--5in caster wheel-->
   <!-- per https://en.wikipedia.org/wiki/List_of_moments_of_inertia 
 	  ixx = m/12(h * h  + d * d)
 	  iyy = m/12(w * w  + d * d)
@@ -31,6 +37,7 @@
 		which  is half way from axil (baselink) to caster attachment
 		which I estimate is 9 inches -->
   <!-- base_link is a fictitious link(frame) that is on the ground right below chassis_link origin -->
+  <!--I want base_link to be centered between front wheel axiles this should be the point of rotation-->
   <!-- 		<xacro:default_inertial mass="0.0001"/> error said to remove this from footprint-->
   <link name="base_link">
     <pose>0 0 0.1 0 0 0</pose>
@@ -60,23 +67,23 @@
       <!-- per http://wiki.ros.org/urdf/XML/link a box's origin is the center of the box 
 			so the way I understand this is we need to offset from the axil to the center of my base 
 			to have the box show up right 
-			I am estimating I have 3 inches in front of my axil (where I want baseink to be)
-			which I think leaves 9 inches to the center of the box 
+			I am estimating I have 3 inches (0.0762m) in front of my axil (where I want baseink to be)
+			which I think leaves 10.78125inches (0.274m) to the center of the box 
 			I think this needs to be negative
 			-->
-      <origin rpy="0 0 0" xyz="-0.22 0 0.00635"/>
+      <origin rpy="0 0 0" xyz="-0.274 0 0.00635"/>
       <material name="White"/>
     </visual>
     <collision>
       <geometry>
         <box size="0.7787 0.68185 0.0913"/>
       </geometry>
-      <origin rpy="0 0 0" xyz="-0.22 0 0"/>
+      <origin rpy="0 0 0" xyz="-0.274 0 0"/>
     </collision>
     <inertial>
       <mass value="12"/>
       <inertia ixx="0.4903012999999999" ixy="0" ixz="0" iyy="0.3640718524999999" iyz="0" izz="0.8540505724999998"/>
-      <origin xyz="-0.22 0 0"/>
+      <origin xyz="-0.274 0 0"/>
     </inertial>
   </link>
   <gazebo reference="chassis_link">
@@ -86,19 +93,19 @@
   <link name="left_wheel">
     <visual>
       <geometry>
-        <cylinder length="0.0682625" radius="0.085725"/>
+        <cylinder length="0.0435" radius="0.085"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="Red"/>
     </visual>
     <collision>
       <geometry>
-        <cylinder length="0.0682625" radius="0.085725"/>
+        <cylinder length="0.0435" radius="0.085"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="1"/>
-      <inertia ixx="0.0022255079817708333" ixy="0" ixz="0" iyy="0.0022255079817708333" iyz="0" izz="0.0036743878124999995"/>
+      <inertia ixx="0.0019639375000000004" ixy="0" ixz="0" iyy="0.0019639375000000004" iyz="0" izz="0.0036125000000000007"/>
     </inertial>
   </link>
   <gazebo reference="left_wheel">
@@ -108,19 +115,19 @@
   <link name="right_wheel">
     <visual>
       <geometry>
-        <cylinder length="0.0682625" radius="0.085725"/>
+        <cylinder length="0.0435" radius="0.085"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <material name="Green"/>
     </visual>
     <collision>
       <geometry>
-        <cylinder length="0.0682625" radius="0.085725"/>
+        <cylinder length="0.0435" radius="0.085"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="1"/>
-      <inertia ixx="0.0022255079817708333" ixy="0" ixz="0" iyy="0.0022255079817708333" iyz="0" izz="0.0036743878124999995"/>
+      <inertia ixx="0.0019639375000000004" ixy="0" ixz="0" iyy="0.0019639375000000004" iyz="0" izz="0.0036125000000000007"/>
     </inertial>
   </link>
   <gazebo reference="right_wheel">
@@ -170,8 +177,12 @@
     <turnGravityOff>false</turnGravityOff>
     <material>Gazebo/Blue</material>
   </gazebo>
+  <!--how I did my laser I want my laser pointing 90 degrees so I created this point to represent the
+   mounting location called laser_point and then I created the actual laser at this point with 
+   the rotation
+  -->
   <!-- laser joint -->
-  <!-- laser is 4 25/32 in front of wheel =.12144-->
+  <!-- laser is 4 25/32 in front of wheel =.12144m-->
   <!-- but attaching laster off chasis so need to add .22-->
   <joint name="laser_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.12144 0 -0.05715"/>
@@ -240,7 +251,7 @@
       <leftJoint>base_to_left_wheel</leftJoint>
       <rightJoint>base_to_right_wheel</rightJoint>
       <wheelSeparation>0.5461</wheelSeparation>
-      <wheelDiameter>0.17145</wheelDiameter>
+      <wheelDiameter>0.17</wheelDiameter>
       <broadcastTF>1</broadcastTF>
       <wheelTorque>30</wheelTorque>
       <wheelAcceleration>1.8</wheelAcceleration>
@@ -250,9 +261,8 @@
       <robotBaseFrame>base_link</robotBaseFrame>
     </plugin>
   </gazebo>
-  <!--
-<gazebo reference="laser_frame">
-    <sensor type="gpu_ray" name="head_hokuyo_sensor">
+  <gazebo reference="laser_frame">
+    <sensor name="head_hokuyo_sensor" type="gpu_ray">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
       <update_rate>7</update_rate>
@@ -272,21 +282,18 @@
         </range>
         <noise>
           <type>gaussian</type>
--->
-  <!-- Noise parameters based on published spec for Hokuyo laser
+          <!-- Noise parameters based on published spec for Hokuyo laser
                achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
                stddev of 0.01m will put 99.7% of samples within 0.03m of the true
                reading. -->
-  <!--          <mean>0.0</mean>
+          <mean>0.0</mean>
           <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
+      <plugin filename="libgazebo_ros_gpu_laser.so" name="gazebo_ros_head_hokuyo_controller">
         <topicName>/scan</topicName>
         <frameName>hokuyo_link</frameName>
       </plugin>
     </sensor>
   </gazebo>
-
--->
 </robot>
