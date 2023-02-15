@@ -1,0 +1,8 @@
+<launch> 
+
+<executable cmd="gazebo --verbose -s libgazebo_ros_init.so  $(find-pkg-share motorcontrol)/worlds/livingroom.world" cwd="/home/robot/bigbot_ws" name="gazebo" output="both"/>
+
+<node pkg="spawnrobot" exec="spawnrobot2" name="spawnrobot" args="0.01 0.02 0.03" output="both" >
+</node>
+<!-- ros2 launch gazebo_ros gzserver.launch.py extra_gazebo_args:="dashdashros-args dashdashparams-file params.yaml"-->
+</launch> 
