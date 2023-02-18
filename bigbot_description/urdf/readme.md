@@ -7,7 +7,8 @@ root is base_footprint base_link is wheel radius above base_footprint everything
 > - differential_drive_controller using base_footprint
 > - gpu_ray laser
 
-## bigbot2.xacro root is base_link  This attaches to chassis wheels and laser off chassis. Laser is rotated 90 degrees.
+## bigbot2.xacro 
+root is base_link  This attaches to chassis wheels and laser off chassis. Laser is rotated 90 degrees.
 
 **Gazebo**
 - differential_drive_controller using base_link

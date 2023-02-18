@@ -338,41 +338,41 @@
   <gazebo>
     <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
 
-      <rosDebugLevel>Debug</rosDebugLevel>
-      <publishWheelTF>false</publishWheelTF>
-      <robotNamespace>/</robotNamespace>
-      <publishTf>1</publishTf>
-      <publishWheelJointState>false</publishWheelJointState>
-      <alwaysOn>true</alwaysOn>
-      <updateRate>100.0</updateRate>
-      <leftJoint>base_to_left_wheel</leftJoint>
-      <rightJoint>base_to_right_wheel</rightJoint>
-      <wheelSeparation>${wheel_base}</wheelSeparation>
-      <wheelDiameter>${2*radius_wheel}</wheelDiameter>
-      <broadcastTF>1</broadcastTF>
-      <wheelTorque>30</wheelTorque>
-      <wheelAcceleration>1.8</wheelAcceleration>
-      <commandTopic>cmd_vel</commandTopic>
-      <odometryFrame>odom</odometryFrame> 
-      <odometryTopic>odom</odometryTopic> 
-      <robotBaseFrame>base_link</robotBaseFrame>
 
+      <left_joint>base_to_left_wheel</left_joint>	  
+      <right_joint>base_to_right_wheel</right_joint>
+      <wheel_separation>${wheel_base}</wheel_separation>
+      <wheel_diameter>${2*radius_wheel}</wheel_diameter>
+
+      <!-- limits -->
+      <max_wheel_torque>30</max_wheel_torque>
+      <max_wheel_acceleration>1.8</max_wheel_acceleration>
+
+      <!-- output -->
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
 
     </plugin>
 </gazebo> 
 
-<gazebo reference="laser_frame">
-    <sensor type="gpu_ray" name="head_hokuyo_sensor">
+  <gazebo reference="laser_frame">
+    <sensor name="sensor_ray" type="ray">
       <pose>0 0 0 0 0 0</pose>
-      <visualize>false</visualize>
-      <update_rate>7</update_rate>
+      <update_rate>100</update_rate>
+
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+
       <ray>
         <scan>
           <horizontal>
             <samples>720</samples>
             <resolution>1</resolution>
-            <min_angle>-1.570796</min_angle>
-            <max_angle>1.570796</max_angle>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
           </horizontal>
         </scan>
         <range>
@@ -381,7 +381,7 @@
           <resolution>0.01</resolution>
         </range>
         <noise>
-          <type>gaussian</type>	  
+          <type>gaussian</type>
           <!-- Noise parameters based on published spec for Hokuyo laser
                achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
                stddev of 0.01m will put 99.7% of samples within 0.03m of the true
@@ -390,9 +390,10 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
+      <plugin filename="libgazebo_ros_ray_sensor.so" name="laser">
         <topicName>/scan</topicName>
-        <frameName>hokuyo_link</frameName>
+        <frameName>laser_frame</frameName>
+        <output_type>sensor_msgs/LaserScan</output_type>
       </plugin>
     </sensor>
   </gazebo>
