@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
+#This will launch both rviz and gazebo
 #
 # usage
+# Assumes use_rviz defaults to true
+# ros2 launch bigbot_description bigbotdescript.launch.py use_sim_time:=true
+#
 # ros2 launch bigbot_description bigbotdescript.launch.py use_sim_time:=false
-# ros2 launch bigbot_description bigbotdescript.launch.py use_rviz:=true use_sim_time:=false
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -46,7 +49,7 @@ def generate_launch_description():
     print(rviz_file)
 
     world_file_name = 'livingroom.world'
-    world = os.path.join(get_package_share_directory('motorcontrol'), 'worlds', world_file_name)
+    world = os.path.join(get_package_share_directory('bigbot_gazebo'), 'worlds', world_file_name)
     print(world)
 
     # packagepath 
@@ -63,7 +66,7 @@ def generate_launch_description():
             description='Use simulation (Gazebo) clock if true'),
     DeclareLaunchArgument(
             'use_rviz',
-            default_value='false',
+            default_value='true',
             description='Use rviz if true'),
      Node(
         package="robot_state_publisher",
@@ -72,6 +75,17 @@ def generate_launch_description():
         parameters=[
                 {"robot_description": robot_desc},{"publish_frequency":2.0}, {'use_sim_time': use_sim_time } ],
         output="both"),
+
+    Node(
+        package="joint_state_publisher", 
+        executable="joint_state_publisher" ,
+        name= "joint_state_publisher",
+        parameters=[        
+            {"robot_description": robot_desc},{"publish_frequency":2.0},
+            {"use_gui": 'true' }    
+                ],
+        output="both",#        condition=IfCondition(use_sim_time)
+        ),        
     Node(
         package='rviz2',
         executable='rviz2',
@@ -81,28 +95,16 @@ def generate_launch_description():
         condition=IfCondition(use_rviz)
         ),
 
-
-    # Node(
-    #     package="joint_state_publisher", 
-    #     executable="joint_state_publisher" ,
-    #     name= "joint_state_publisher",
-    #     parameters=[        
-    #         {"robot_description": robot_desc},{"publish_frequency":2.0},
-    #         {"use_gui": 'true' }    
-    #             ],
-    #     output="both",
-    #     condition=IfCondition(use_sim_time)
-    #     ),
-    # ExecuteProcess(
-    #         cmd=[mycmd, '--verbose', '-s', 'libgazebo_ros_factory.so' , world],
-    #         output='both',
-    #         condition=IfCondition(use_sim_time)
-    #         ),
-    # Node(package='spawnrobot', 
-    #     executable='spawnrobot2', 
-    #     arguments=['0.01','0.02','0.03' ], 
-    #     output='screen',
-    #     condition=IfCondition(use_sim_time)
-    #     ),
+    ExecuteProcess(
+             cmd=[mycmd, '--verbose', '-s', 'libgazebo_ros_factory.so' , world],
+             output='both',
+             condition=IfCondition(use_sim_time)
+        ),
+    Node(package='spawnrobot', 
+         executable='spawnrobot2', 
+         arguments=['0.01','0.02','0.03' ], 
+         output='screen',
+         condition=IfCondition(use_sim_time)
+         ),
 
   ])

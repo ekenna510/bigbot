@@ -26,8 +26,16 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(bigbot_description REQUIRED)
 
+
+add_executable(dummy src/dummy.cpp   )
+ament_target_dependencies(dummy rclcpp ) 
+
+
 install(DIRECTORY launch worlds
   DESTINATION share/${PROJECT_NAME}/
+)
+install(TARGETS dummy
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-#ros2 launch bigbot_description bigbotdescript.launch.py use_sim_time:=false
+#
+# usage
+# Assumes use_rviz defaults to true
+# ros2 launch bigbot_description description.launch.py use_sim_time:=true
+#
+# ros2 launch bigbot_description description.launch.py  use_sim_time:=false
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -47,7 +52,7 @@ def generate_launch_description():
             description='Use simulation (Gazebo) clock if true'),
     DeclareLaunchArgument(
             'use_rviz',
-            default_value='false',
+            default_value='true',
             description='Use rviz if true'),
      Node(
         package="robot_state_publisher",
@@ -68,8 +73,7 @@ def generate_launch_description():
             {"robot_description": robot_desc},{"publish_frequency":2.0},
             {"use_gui": 'true' }    
                 ],
-        output="both",
-        condition=IfCondition(use_sim_time)
+        output="both" #,condition=IfCondition(use_sim_time)
         ),
     Node(
         package='rviz2',

@@ -33,4 +33,7 @@
 
 #urdf
 *.urdf
-*.sdf
+robot*.sdf
+
+#gimp type
+*.xcf
