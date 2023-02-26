@@ -38,7 +38,7 @@
 
 
 	<!-- Defining parameters-->
-	<xacro:property name="mass_base" value="12" />
+	<xacro:property name="mass_base" value="24" />
 	<xacro:property name="length_base" value="0.7001" /> <!-- 27 9/16-->
 	<xacro:property name="width_base" value="0.60325" /><!--23.75 -->
 	<xacro:property name="depth_base" value="0.0508" />
