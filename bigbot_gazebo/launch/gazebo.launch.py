@@ -19,9 +19,9 @@ from launch.conditions import IfCondition
 
 def generate_launch_description():
 
-    use_sim_time = LaunchConfiguration('use_sim_time', default='false')
-    sdf_file = os.path.join(get_package_share_directory('bigbot_gazebo'), 'urdf', 'robot2.sdf')    
-    assert os.path.exists(sdf_file), "The box_bot.xacro doesnt exist in "+str(sdf_file)
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+    sdf_file = os.path.join(get_package_share_directory('bigbot_description'), 'urdf', 'robot2.sdf')    
+    assert os.path.exists(sdf_file), "The robot2.sdf doesnt exist in "+str(sdf_file)
     print(sdf_file)
 
     world_file_name = 'livingroom.world'
@@ -38,6 +38,26 @@ def generate_launch_description():
 
     #print("mycmd",mycmd)
     #print("world",world)
+
+
+    #if 'GAZEBO_MODEL_PATH' in os.environ:
+    #    os.environ['GAZEBO_MODEL_PATH'] =  os.environ['GAZEBO_MODEL_PATH'] + ':' + install_dir + '/share' + ':' + gazebo_models_path
+    #else:
+    #    os.environ['GAZEBO_MODEL_PATH'] =  install_dir + "/share" + ':' + gazebo_models_path
+
+    #if 'GAZEBO_PLUGIN_PATH' in os.environ:
+    #    os.environ['GAZEBO_PLUGIN_PATH'] = os.environ['GAZEBO_PLUGIN_PATH'] + ':' + install_dir + '/lib'
+    #else:
+    #    os.environ['GAZEBO_PLUGIN_PATH'] = install_dir + '/lib'
+
+    
+
+    print("GAZEBO MODELS PATH=="+str(os.environ["GAZEBO_MODEL_PATH"]))
+    print("GAZEBO PLUGINS PATH=="+str(os.environ["GAZEBO_PLUGIN_PATH"]))
+
+
+
+
 
     return LaunchDescription([
 
