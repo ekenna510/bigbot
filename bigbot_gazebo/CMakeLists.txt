@@ -31,7 +31,7 @@ add_executable(dummy src/dummy.cpp   )
 ament_target_dependencies(dummy rclcpp ) 
 
 
-install(DIRECTORY launch worlds
+install(DIRECTORY launch worlds config
   DESTINATION share/${PROJECT_NAME}/
 )
 install(TARGETS dummy

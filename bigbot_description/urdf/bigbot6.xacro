@@ -154,6 +154,80 @@
 	</gazebo>
 
 
+	<link name="leftstrut">
+   		<visual>
+			<geometry>
+      				<box size="${radius_wheel+.02} .03 .02"/>
+     			</geometry>
+			<!-- per http://wiki.ros.org/urdf/XML/link a box's origin is the center of the box 
+			so the way I understand this is we need to offset from the axil to the center of my base 
+			to have the box show up right 
+			I am estimating I have 3 inches (0.0762m) in front of my axil (where I want baseink to be)
+			which I think leaves 10.78125inches (0.274m) to the center of the box 
+			I think this needs to be negative
+			--> 
+			<origin xyz="0 0 ${-((radius_wheel+.02)/2)}" rpy="1.5707 1.5707  0" />
+			<material name="Black"/>
+   		</visual>
+		<collision>
+			<geometry>
+       				<box size="${radius_wheel+.02} .03 .02"/>
+			</geometry>
+			<origin xyz="0 0 ${-((radius_wheel+.04)/2)}" rpy="1.5707 1.5707  0"/>
+		</collision>
+
+		<!--xacro:box_inertial m="${mass_base}" w=".03" h="${radius_wheel}+.02" d=".02"  x="-0.274" /-->
+	</link>
+	<gazebo reference="leftstrut">
+	    <material>Gazebo/Black</material>
+	    <turnGravityOff>false</turnGravityOff>
+	</gazebo>
+
+	 <joint name="base_to_leftstrut" type="fixed">
+		<parent link="chassis_link"/>
+		<child link="leftstrut"/>
+		<origin rpy="0 0  0" xyz="0 ${(width_base/2)-(length_wheel + 0.01)}  0.0"/>
+		<axis xyz="0 0 0" />
+	 </joint>
+
+	<link name="rightstrut">
+   		<visual>
+			<geometry>
+      				<box size="${radius_wheel+.02} .03 .02"/>
+     			</geometry>
+			<!-- per http://wiki.ros.org/urdf/XML/link a box's origin is the center of the box 
+			so the way I understand this is we need to offset from the axil to the center of my base 
+			to have the box show up right 
+			I am estimating I have 3 inches (0.0762m) in front of my axil (where I want baseink to be)
+			which I think leaves 10.78125inches (0.274m) to the center of the box 
+			I think this needs to be negative
+			-0.274 0 ${depth_base/2}
+			--> 
+			<origin xyz="0 0 ${-((radius_wheel+.02)/2)}" rpy="1.5707 1.5707 0" />
+			<material name="Black"/>
+   		</visual>
+		<collision>
+			<geometry>
+       				<box size="${radius_wheel+.02} .03 .02"/>
+			</geometry>
+			<origin rpy="0 0 ${-((radius_wheel+.04)/2)}" xyz="1.5707 1.5707 0"/>
+		</collision>
+
+		<!--xacro:box_inertial m="${mass_base}" w=".03" h="${radius_wheel}+.02" d=".02"  x="-0.274" /-->
+	</link>
+	<gazebo reference="rightstrut">
+	    <material>Gazebo/Black</material>
+	    <turnGravityOff>false</turnGravityOff>
+	</gazebo>
+
+	 <joint name="base_to_rightstrut" type="fixed">
+		<parent link="chassis_link"/>
+		<child link="rightstrut"/>
+		<origin rpy="0 0 0" xyz="0 ${-(width_base/2)+(length_wheel + 0.01)} 0.0"/>
+		<axis xyz="0 0 0" />
+	 </joint>
+
+
  	<link name="left_wheel">
    		<visual>
      			<geometry>
@@ -201,19 +275,21 @@
      </gazebo>
 
 	 <joint name="base_to_left_wheel" type="continuous">
-		<parent link="chassis_link"/>
+		<parent link="leftstrut"/>
 		<child link="left_wheel"/>
-		<origin rpy="1.5707 0 0" xyz="0 ${wheel_base/2} ${-wheel_offset}"/>
+		<origin rpy="1.5707  0 0" xyz="0  ${length_wheel-.01} ${-(radius_wheel+.02)}"/>
 		<axis xyz="0 0 1" />
 	 </joint>
 
 
 	 <joint name="base_to_right_wheel" type="continuous">
-		<parent link="chassis_link"/>
+		<parent link="rightstrut"/>
 		<child link="right_wheel"/>
-		<origin rpy="1.5707 0 0" xyz="0 ${-wheel_base/2} ${-wheel_offset}"/>
+		<origin rpy="1.5707 0 0" xyz="0 ${-(length_wheel-.01)} ${-(radius_wheel+.02)}"/>
 		<axis xyz="0 0 1" />
 	 </joint>
+
+
 
 
 	<!--Caster Back  -->
@@ -328,7 +404,6 @@
     </inertial>
   </link>
 
-
  
   <!-- Differential drive controller  -->
   <gazebo>
@@ -394,5 +469,6 @@
       </plugin>
     </sensor>
   </gazebo>
+
 
 </robot>
