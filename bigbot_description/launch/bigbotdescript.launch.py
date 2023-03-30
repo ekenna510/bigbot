@@ -31,7 +31,7 @@ def generate_launch_description():
 
 
 
-    urdf_file = os.path.join(get_package_share_directory('bigbot_description'), 'urdf', 'robot2.urdf')    
+    urdf_file = os.path.join(get_package_share_directory('bigbot_description'), 'urdf', 'robot6.urdf')    
     assert os.path.exists(urdf_file), "The  doesnt exist in "+str(urdf_file)
     print(urdf_file)
 
@@ -40,7 +40,7 @@ def generate_launch_description():
 
     rsp_params = {'robot_description': robot_desc}
 
-    sdf_file = os.path.join(get_package_share_directory('bigbot_description'), 'urdf', 'robot2.sdf')    
+    sdf_file = os.path.join(get_package_share_directory('bigbot_description'), 'urdf', 'robot6.sdf')    
     assert os.path.exists(sdf_file), "The box_bot.xacro doesnt exist in "+str(sdf_file)
     print(sdf_file)
 

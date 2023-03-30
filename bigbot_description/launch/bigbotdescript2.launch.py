@@ -135,7 +135,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     use_rviz = LaunchConfiguration('use_rviz', default='true')
     rvizconfig = LaunchConfiguration('rvizconfig', default='odom.rviz')
-    model =  LaunchConfiguration('model', default='robot2.urdf')
+    model =  LaunchConfiguration('model', default='robot6.urdf')
     world = LaunchConfiguration('world', default='livingroom.world')
 
     #rviz_config = LaunchConfiguration('rvizconfig', default='odom.rviz')
@@ -160,7 +160,7 @@ def generate_launch_description():
             description='which rviz config file in rviz folder'),
     DeclareLaunchArgument(
             'model',
-            default_value='robot2.urdf',
+            default_value='robot6.urdf',
             description='which model xacro file in urdf folder'),
     DeclareLaunchArgument(
           'world',
