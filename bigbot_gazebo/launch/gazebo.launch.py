@@ -20,7 +20,7 @@ from launch.conditions import IfCondition
 def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    sdf_file = os.path.join(get_package_share_directory('bigbot_description'), 'urdf', 'robot2.sdf')    
+    sdf_file = os.path.join(get_package_share_directory('bigbot_description'), 'urdf', 'robot6.sdf')    
     assert os.path.exists(sdf_file), "The robot2.sdf doesnt exist in "+str(sdf_file)
     print(sdf_file)
 

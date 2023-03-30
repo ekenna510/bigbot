@@ -28,6 +28,7 @@ def generate_launch_description():
     world = os.path.join(get_package_share_directory('bigbot_gazebo'), 'worlds', world_file_name)
     launch_file_dir = os.path.join(get_package_share_directory('bigbot_gazebo'), 'launch')
     spawn_launch_dir=os.path.join(get_package_share_directory('spawnrobot'), 'launch')
+    configfile = os.path.join(get_package_share_directory('bigbot_gazebo'), 'config', 'efk.yaml')
 
     #urdffile = os.path.join(get_package_share_directory('turtlebot_description'),''
 
@@ -46,11 +47,12 @@ def generate_launch_description():
     #else:
     #    print("headless")
 
-    print("mycmd",mycmd)
-    print("world",world)
+    print("mycmd ",mycmd)
+    print("world ",world)
+    print("configfile ",configfile)
     #
 
-    urdf_file_name = 'robot2.urdf'
+    urdf_file_name = 'robot6.urdf'
 
 
 
@@ -90,7 +92,7 @@ def generate_launch_description():
 
         Node(package='spawnrobot', 
         executable='spawnrobot2', 
-        arguments=['0.01','0.02','0.03' ], 
+        arguments=[x,y,z ], 
         output='both',
         condition=IfCondition(use_sim_time)
         ),
@@ -100,7 +102,21 @@ def generate_launch_description():
             executable='robot_state_publisher',
             name='robot_state_publisher',
             output='screen',
-            parameters=[rsp_params, {'use_sim_time': use_sim_time}])        
+            parameters=[rsp_params, {'use_sim_time': use_sim_time}]),
+    #joint_state_publisher_node = 
+    Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher'
+        ),                    
+    #robot_localization_node = 
+    Node(
+         package='robot_localization',
+         executable='ekf_node',
+         name='ekf_filter_node',
+         output='screen',
+         parameters=[configfile, {'use_sim_time': use_sim_time }]
+    )
 
 
     ]
