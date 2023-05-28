@@ -36,7 +36,7 @@
 	<xacro:property name="width_base" value="0.60325" /><!--23.75 in -->
 	<xacro:property name="depth_base" value="0.0127" />
 
-	<xacro:property name="wheel_base" value=" 0.5461" /> <!--23.25 in outside to outside  - 0.0435m width of wheel  -->
+	<xacro:property name="wheel_base" value="0.5461" /> <!--23.25 in outside to outside  - 0.0435m width of wheel  -->
 	<xacro:property name="length_wheel" value="0.0435" /> <!-- 0.0435 from diagram of wheel-->
 	<xacro:property name="radius_wheel" value="0.085" /> <!-- 0.170 (from diagram of wheel)/2 -->
 	<xacro:property name="extend_wheel" value="0.0" /> <!-- to be added to collision for axile -->
